@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flip Card (Landscape)</title>
+  <style>
+    :root{
+      /* 横向卡片推荐比例（可按你的图片比例微调） */
+      --w: 720px;
+      --h: 420px;
+      --r: 18px;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#f4f6f9;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .scene{ perspective: 1200px; }
+
+    .card{
+      width: var(--w);
+      height: var(--h);
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 650ms ease;
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+      border-radius: calc(var(--r) + 2px);
+    }
+
+    .card.flipped{ transform: rotateY(180deg); }
+
+    .face{
+      position:absolute;
+      inset:0;
+      border-radius: var(--r);
+      overflow:hidden;
+      backface-visibility: hidden;
+      box-shadow: 0 14px 40px rgba(0,0,0,.14);
+      background:#fff;
+    }
+
+    .face img{
+      width:100%;
+      height:100%;
+      object-fit: cover;  /* 不想裁切就改为 contain */
+      display:block;
+    }
+
+    .back{ transform: rotateY(180deg); }
+
+    /* 移动端：横屏/竖屏都尽量铺满 */
+    @media (max-width: 900px){
+      :root{
+        --w: 94vw;
+        --h: 55vw; /* 约等于 16:9 的横向比例，可按需要改 */
+      }
+    }
+    @media (max-width: 520px){
+      :root{
+        --w: 94vw;
+        --h: 62vw; /* 手机上略高一点更舒服 */
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .card{ transition: none; }
+    }
+
+    .tip{
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      opacity: .6;
+      text-align:center;
+      padding: 6px 10px;
+      background: rgba(255,255,255,.75);
+      border-radius: 999px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      backdrop-filter: blur(6px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="scene">
+    <div id="card" class="card" tabindex="0" aria-label="点击翻面横向贺卡">
+      <div class="face front">
+        <img src="3.jpg" alt="Card front">
+      </div>
+      <div class="face back">
+        <img src="4.jpg" alt="Card back">
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">点击翻面（或 Enter / 空格）</div>
+
+  <script>
+    const card = document.getElementById("card");
+    function toggleFlip(){ card.classList.toggle("flipped"); }
+
+    card.addEventListener("click", toggleFlip);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFlip();
+      }
+    });
+  </script>
+</body>
+</html>
