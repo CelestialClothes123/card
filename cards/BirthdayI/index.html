@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday! </title>
+
+  <style>
+    :root{
+      /* 更大的显示框（你说裁剪框不够大） */
+      --w: 560px;
+      --h: 820px;
+      --r: 22px;
+      --dur: 700ms;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      background:#f4f6f9;
+      font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* 避免页面里有任何“返回链接”样式残留（如果你误放了 <a>） */
+    a, a:visited{ color: inherit; text-decoration: none; }
+    a{ display:none !important; } /* 如果你确实不需要任何链接，强制隐藏 */
+
+    .title{
+      font-size: 26px;
+      font-weight: 650;
+      letter-spacing: .4px;
+      margin: 0;
+    }
+
+    .scene{ perspective: 1400px; }
+
+    .card{
+      width: var(--w);
+      height: var(--h);
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform var(--dur) ease;
+      cursor: pointer;
+      user-select: none;
+      border-radius: calc(var(--r) + 2px);
+    }
+
+    .face{
+      position:absolute;
+      inset:0;
+      border-radius: var(--r);
+      overflow:hidden;
+      backface-visibility: hidden;
+      box-shadow: 0 20px 55px rgba(0,0,0,.18);
+      background:#fff;
+    }
+
+    .face img{
+      width:100%;
+      height:100%;
+      display:block;
+
+      /* 关键：仍然铺满，但优先保留顶部（把裁切“往下挪”） */
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .back{ transform: rotateY(180deg); }
+
+    .tip{
+      font-size: 13px;
+      letter-spacing: .3px;
+      opacity: .65;
+      margin: 0;
+    }
+
+    /* 手机适配 */
+    @media (max-width: 520px){
+      :root{
+        --w: 94vw;
+        --h: 150vw; /* 比之前更高，尽量减少裁切 */
+      }
+      .title{ font-size: 22px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .card{ transition:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 这里不要出现任何多余字符，比如单独一个 "<" -->
+  <h1 class="title">Happy Birthday! 🎂</h1>
+
+  <div class="scene">
+    <div id="card" class="card" tabindex="0" aria-label="Tap to Flip">
+      <div class="face front"><img id="imgFront" alt="front"></div>
+      <div class="face back"><img id="imgBack" alt="back"></div>
+    </div>
+  </div>
+
+  <p class="tip">Tap to Flip</p>
+
+  <script>
+    (() => {
+      const card     = document.getElementById("card");
+      const imgFront = document.getElementById("imgFront");
+      const imgBack  = document.getElementById("imgBack");
+
+      const urls = ["1.jpg", "2.jpg"];
+
+      let idx = 0;
+      let isAnimating = false;
+      let flipLeftNext = true;
+
+      imgFront.src = urls[0];
+      imgBack.src  = urls[1 % urls.length];
+
+      function flipNext(){
+        if (isAnimating) return;
+        isAnimating = true;
+
+        const nextIdx = (idx + 1) % urls.length;
+        imgBack.src = urls[nextIdx];
+
+        const deg = flipLeftNext ? -180 : 180;
+        card.style.transform = `rotateY(${deg}deg)`;
+
+        card.addEventListener("transitionend", function handler(e){
+          if (e.propertyName !== "transform") return;
+          card.removeEventListener("transitionend", handler);
+
+          idx = nextIdx;
+          imgFront.src = urls[idx];
+          imgBack.src  = urls[(idx + 1) % urls.length];
+
+          card.style.transition = "none";
+          card.style.transform = "rotateY(0deg)";
+          void card.offsetWidth;
+          card.style.transition = "";
+
+          flipLeftNext = !flipLeftNext;
+          isAnimating = false;
+        });
+      }
+
+      card.addEventListener("click", flipNext);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          flipNext();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
